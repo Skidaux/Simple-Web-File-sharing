@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Edit <%= filename %></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="py-5">
+            <h2>Edit <%= filename %></h2>
+            <form action="/save/<%= filePath %>" method="POST">
+                <div id="editor" class="border rounded" style="height: 400px; width: 100%;"><%= content %></div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-secondary" onclick="formatContent()">Format</button>
+                    <input type="submit" class="btn btn-primary" value="Save">
+                    <input type="hidden" name="content" id="content">
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/json");
+    editor.session.setValue('<%- JSON.stringify(content).slice(1, -1).replace(/'/g, "\\'") %>');
+
+    function formatContent() {
+        try {
+            const formattedContent = JSON.stringify(JSON.parse(editor.getValue()), null, 2);
+            editor.setValue(formattedContent);
+        } catch (error) {
+            console.error('Unable to format content:', error);
+        }
+    }
+
+    document.forms[0].addEventListener('submit', () => {
+        document.getElementById('content').value = editor.getValue();
+    });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
