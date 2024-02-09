@@ -3,77 +3,115 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const app = express();
+const cors = require('cors')
 const multer  = require('multer');
 
 
+app.use(cors());
+
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 app.set('view engine', 'ejs');
 
+const readDirectory = async (dirPath) => {
+    const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
+    const files = [];
 
-app.get('/download/*', (req, res) => {
+    for (let dirent of entries) {
+        const itemPath = path.join(dirPath, dirent.name).replace(/\\/g, '/'); // Ensure forward slashes
+        // Only append the name and type, construct relative path for each item
+        const relativePath = path.relative(__dirname + '/files', itemPath);
+        files.push({
+            name: dirent.name,
+            type: dirent.isDirectory() ? 'directory' : 'file',
+            // Append '/' to directories to indicate it's a directory
+            path: dirent.isDirectory() ? `${relativePath}/` : relativePath,
+        });
+    }
+
+    return files;
+};
+
+
+
+app.get('/api/download/*', (req, res) => {
     const filePath = path.join(__dirname, 'files', req.params[0]);
     res.download(filePath, (err) => {
         if (err) {
             console.error('File download failed:', err);
-            res.status(500).send('Server Error');
+            return res.status(500).send('Server Error');
         }
     });
 });
 
 
-app.get('/edit/*', (req, res) => {
+app.get('/api/edit/*', (req, res) => {
     
     const relativePath = req.params[0];
     const filePath = path.join(__dirname, 'files', relativePath);
     fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                return res.status(404).send('File not found');
+        
+            if (err) {
+                console.error('Unable to read file:', err);
+                const status = err.code === 'ENOENT' ? 404 : 500;
+                return res.status(status).send('Error processing your request');
             }
-            console.error('Unable to read file:', err);
-            return res.status(500).send('Server Error');
-        }
-        res.render('edit', { content: data, filename: path.basename(relativePath), filePath: relativePath });
+        res.json( { content: data, filename: path.basename(relativePath), filePath: relativePath });
     });
 });
 
+app.get('/api/list/*', async (req, res) => {
+    // Construct directory path from request
+    const requestedPath = req.params[0] ? req.params[0] : '';
+    const directoryPath = path.join(__dirname, 'files', requestedPath);
 
-app.get('/*', (req, res) => {
-    const directoryPath = path.join(__dirname, 'files', req.params[0] || '');
-    const parentPath = path.dirname(req.params[0] || '.');
-    console.log(directoryPath);
-    fs.readdir(directoryPath, { withFileTypes: true }, (err, files) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                return res.status(404).send('Directory not found');
-            }
-            console.error('Unable to scan directory:', err);
-            return res.status(500).send('Server Error');
-        }
-        res.render('index', { files: files, currentPath: req.params[0] || '', parentPath: parentPath, path: path });
-    });
+    try {
+        const directoryStructure = await readDirectory(directoryPath);
+        res.json({ files: directoryStructure });
+    } catch (err) {
+        console.error('Error reading directory:', err);
+        res.status(500).send('Failed to read directory structure');
+    }
 });
 
 
-app.post('/save/*', (req, res) => {
+// app.get('/*', (req, res) => {
+//     const directoryPath = path.join(__dirname, 'files', req.params[0] || '');
+//     const parentPath = path.dirname(req.params[0] || '.');
+//     console.log(directoryPath);
+//     fs.readdir(directoryPath, { withFileTypes: true }, (err, files) => {
+//         if (err) {
+//             if (err.code === 'ENOENT') {
+//                 return res.status(404).send('Directory not found');
+//             }
+//             console.error('Unable to scan directory:', err);
+//             return res.status(500).send('Server Error');
+//         }
+//         res.render('index', { files: files, currentPath: req.params[0] || '', parentPath: parentPath, path: path });
+//     });
+// });
+
+
+app.post('/api/save/*', (req, res) => {
     const filePath = path.join(__dirname, 'files', req.params[0]);
     fs.writeFile(filePath, req.body.content, (err) => {
         if (err) {
             console.error('Unable to write file:', err);
-            return res.status(500).send('Server Error');
+            return res.status(500).json({ success: false, message: 'Server Error' });
         }
-        res.redirect('/');
+        res.json({ success: true, message: 'File saved successfully' });
     });
 });
 
-app.post('/delete/*', (req, res) => {
+app.post('/api/delete/*', (req, res) => {
     const filePath = path.join(__dirname, 'files', req.params[0]);
     fs.unlink(filePath, (err) => {
         if (err) {
             console.error('Unable to delete file:', err);
-            return res.status(500).send('Server Error');
+            return res.status(500).json({ success: false, message: 'Server Error' });
         }
-        res.redirect('/');
+        res.json({ success: true, message: 'File deleted successfully' });
     });
 });
 
@@ -90,7 +128,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), (req, res) => {
     if (req.file) {
         res.redirect(`/${req.body.directory || ''}`);
     } else {
