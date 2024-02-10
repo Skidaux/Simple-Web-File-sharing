@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface File {
   name: string;
@@ -94,13 +95,13 @@ const FileBrowser: React.FC = () => {
             {file.type === 'directory' ? (
               <>
                 <Link to={`/browse/${file.path}`}>{file.name}/</Link>
-                <button onClick={() => handleDelete(file.path)}>Delete</button>
+                <Button onClick={() => handleDelete(file.path)}>Delete</Button>
               </>
             ) : (
               <div>
-                {file.name} <a href={`/api/download/${file.path}`} download>Download</a>
-                <button onClick={() => handleEdit(file.path)}>Edit</button>
-                <button onClick={() => handleDelete(file.path)}>Delete</button>
+                {file.name} <Button><a href={`/api/download/${file.path}`} download>Download</a></Button>
+                <Button onClick={() => handleEdit(file.path)}>Edit</Button>
+                <Button onClick={() => handleDelete(file.path)}>Delete</Button>
               </div>
             )}
           </li>
