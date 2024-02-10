@@ -105,13 +105,37 @@ app.post('/api/save/*', (req, res) => {
 });
 
 app.post('/api/delete/*', (req, res) => {
-    const filePath = path.join(__dirname, 'files', req.params[0]);
-    fs.unlink(filePath, (err) => {
+    const relativePath = req.params[0]; // The relative path provided in the URL
+    const filePath = path.join(__dirname, 'files', relativePath);
+
+    // Safety check to prevent deletion of the root directory or any unintended higher-level directories
+    if (!relativePath || relativePath === '/' || path.relative(__dirname, filePath).startsWith('..')) {
+        return res.status(400).json({ success: false, message: 'Invalid request: Attempt to access restricted directory' });
+    }
+
+    fs.stat(filePath, (err, stats) => {
         if (err) {
-            console.error('Unable to delete file:', err);
-            return res.status(500).json({ success: false, message: 'Server Error' });
+            console.error('Error accessing path:', err);
+            return res.status(404).json({ success: false, message: 'Path not found' });
         }
-        res.json({ success: true, message: 'File deleted successfully' });
+
+        if (stats.isDirectory()) {
+            fs.rm(filePath, { recursive: true }, (err) => {
+                if (err) {
+                    console.error('Unable to delete directory:', err);
+                    return res.status(500).json({ success: false, message: 'Server Error' });
+                }
+                res.json({ success: true, message: 'Directory deleted successfully' });
+            });
+        } else {
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Unable to delete file:', err);
+                    return res.status(500).json({ success: false, message: 'Server Error' });
+                }
+                res.json({ success: true, message: 'File deleted successfully' });
+            });
+        }
     });
 });
 
