@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMatch } from 'react-router-dom';
+import AceEditor from "react-ace";
+
+// Import language tools for auto-completion and snippets
+import "ace-builds/src-noconflict/ext-language_tools";
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-html";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/mode-text";
+import "ace-builds/src-noconflict/theme-monokai";
 
 const EditFile: React.FC = () => {
   const params = useParams(); // Use useParams without specifying a custom type
@@ -9,10 +18,10 @@ const EditFile: React.FC = () => {
   const filePath = match?.params['*'] || '';
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [fileExtension, setFileExtension] = useState<string>(''); // Add state for file extension
 
   useEffect(() => {
     // Assert that filePath exists and is a string
-
     if (!filePath) {
       console.log('File path is undefined');
       setIsLoading(false);
@@ -29,6 +38,11 @@ const EditFile: React.FC = () => {
         }
         const data = await response.json();
         setContent(data.content);
+
+        // Extract file extension from filename
+        const filename = data.filename || '';
+        const extension = filename.split('.').pop()?.toLowerCase() || '';
+        setFileExtension(extension);
       } catch (error) {
         console.error('Failed to fetch file content:', error);
       } finally {
@@ -39,14 +53,16 @@ const EditFile: React.FC = () => {
     fetchFileContent();
   }, [params.filePath]); // Depend on params.filePath directly
 
-  const saveFile = async () => {
-    
+  const handleAceChange = (newContent) => {
+    setContent(newContent);
+  };
 
+  const saveFile = async () => {
     if (!filePath) {
       console.error('File path is undefined');
       return;
     }
-console.log(filePath)
+    console.log(filePath);
     try {
       const encodedFilePath = encodeURIComponent(filePath);
       const response = await fetch(`/api/save/${encodedFilePath}`, {
@@ -68,14 +84,42 @@ console.log(filePath)
 
   if (isLoading) return <div>Loading...</div>;
 
+  let mode = ''; // Initialize mode variable
+  switch (fileExtension) {
+    case 'js':
+      mode = 'javascript';
+      break;
+    case 'html':
+      mode = 'html';
+      break;
+    case 'json':
+      mode = 'json';
+      break;
+    default:
+      mode = 'text'; // Default to plain text
+      break;
+  }
+
   return (
     <div>
-      <h2>Editing: {params.filePath}</h2>
-      <textarea
+      <h2>Editing: {filePath}</h2>
+      <AceEditor
+        height="100px"
         value={content}
-        onChange={(e) => setContent(e.target.value)}
-        style={{ width: '100%', height: '400px' }}
+        mode={mode} // Use the dynamically determined mode
+        theme="monokai"
+        fontSize="16px"
+        highlightActiveLine={true}
+        onChange={handleAceChange}
+        setOptions={{
+          enableLiveAutocompletion: true, // Enable live auto-completion
+          enableBasicAutocompletion: true, // Enable basic auto-completion
+          enableSnippets: true, // Enable snippets
+          showLineNumbers: true,
+          tabSize: 2,
+        }}
       />
+  
       <button onClick={saveFile}>Save</button>
     </div>
   );
