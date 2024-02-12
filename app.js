@@ -160,6 +160,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     }
 });
 
+app.use('/files', express.static('files'))
 
 
 app.listen(3000, () => {

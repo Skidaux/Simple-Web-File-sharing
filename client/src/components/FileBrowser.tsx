@@ -87,27 +87,37 @@ const FileBrowser: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Browsing: /{path}</h2>
-      <ul>
+    <div className="p-4">
+      <h2 className="text-lg font-bold mb-4">Browsing: /{path}</h2>
+      <div className="space-y-4">
         {files.map((file) => (
-          <li key={file.path}>
+          <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
             {file.type === 'directory' ? (
-              <>
-                <Link to={`/browse/${file.path}`}>{file.name}/</Link>
-                <Button onClick={() => handleDelete(file.path)}>Delete</Button>
-              </>
+              <div>
+                <Link to={`/browse/${file.path}`} className="text-blue-500 hover:underline">
+                  {file.name}/
+                </Link>
+              </div>
             ) : (
               <div>
-                {file.name} <Button><a href={`/api/download/${file.path}`} download>Download</a></Button>
-                <Button onClick={() => handleEdit(file.path)}>Edit</Button>
-                <Button onClick={() => handleDelete(file.path)}>Delete</Button>
+                <span>{file.name}</span>
               </div>
             )}
-          </li>
+            <div className="ml-auto">
+              {file.type === 'directory' ? (
+                <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
+              ) : (
+                <>
+                  <Button className='bg-green-600 hover:bg-green-700'><a href={`/api/download/${file.path}`} download >Download</a></Button>
+                  <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">Edit</Button>
+                  <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
+                </>
+              )}
+            </div>
+          </div>
         ))}
-      </ul>
-      {path && <Link to={goBackPath()}>Go Back</Link>}
+      </div>
+      {path && <Link to={goBackPath()} className="block mt-4 text-blue-500 hover:underline">Go Back</Link>}
     </div>
   );
 };
