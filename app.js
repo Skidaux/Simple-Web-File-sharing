@@ -14,6 +14,18 @@ app.use(bodyParser.json());
 
 app.set('view engine', 'ejs');
 
+const formatFileSize = (bytes) => {
+    if (bytes < 1024) {
+        return bytes + ' B';
+    } else if (bytes < 1024 * 1024) {
+        return (bytes / 1024).toFixed(2) + ' KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    } else {
+        return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    }
+};
+
 const readDirectory = async (dirPath) => {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
     const files = [];
@@ -22,16 +34,22 @@ const readDirectory = async (dirPath) => {
         const itemPath = path.join(dirPath, dirent.name).replace(/\\/g, '/'); // Ensure forward slashes
         // Only append the name and type, construct relative path for each item
         const relativePath = path.relative(__dirname + '/files', itemPath);
+        const stats = await fs.promises.stat(itemPath); // Get file stats
+        const fileSize = formatFileSize(stats.size); // Format file size
         files.push({
             name: dirent.name,
             type: dirent.isDirectory() ? 'directory' : 'file',
             // Append '/' to directories to indicate it's a directory
             path: dirent.isDirectory() ? `${relativePath}/` : relativePath,
+            size: dirent.isDirectory() ? null : fileSize, // Add size for files, null for directories
         });
     }
 
     return files;
 };
+
+
+
 
 
 

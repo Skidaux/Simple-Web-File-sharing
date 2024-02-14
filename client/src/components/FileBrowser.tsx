@@ -6,6 +6,7 @@ interface File {
   name: string;
   type: 'directory' | 'file';
   path: string;
+  size: string;
 }
 
 const FileBrowser: React.FC = () => {
@@ -100,7 +101,7 @@ const FileBrowser: React.FC = () => {
               </div>
             ) : (
               <div>
-                <span>{file.name}</span>
+                <span>{file.name} {file.size}</span>
               </div>
             )}
             <div className="ml-auto">
