@@ -109,7 +109,8 @@ const FileBrowser: React.FC = () => {
                 <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
               ) : (
                 <>
-                  <Button className='bg-green-600 hover:bg-green-700'><a href={`/api/download/${file.path}`} download >Download</a></Button>
+                  <Button className='bg-yellow-600 hover:bg-yellow-700 ml-2'><a href={`/files/${file.path}`}>View</a></Button>
+                  <Button className='bg-green-600 hover:bg-green-700 ml-2'><a href={`/api/download/${file.path}`} download >Download</a></Button>
                   <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">Edit</Button>
                   <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
                 </>
