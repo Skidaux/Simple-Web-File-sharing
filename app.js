@@ -94,21 +94,7 @@ app.get('/api/list/*', async (req, res) => {
 });
 
 
-// app.get('/*', (req, res) => {
-//     const directoryPath = path.join(__dirname, 'files', req.params[0] || '');
-//     const parentPath = path.dirname(req.params[0] || '.');
-//     console.log(directoryPath);
-//     fs.readdir(directoryPath, { withFileTypes: true }, (err, files) => {
-//         if (err) {
-//             if (err.code === 'ENOENT') {
-//                 return res.status(404).send('Directory not found');
-//             }
-//             console.error('Unable to scan directory:', err);
-//             return res.status(500).send('Server Error');
-//         }
-//         res.render('index', { files: files, currentPath: req.params[0] || '', parentPath: parentPath, path: path });
-//     });
-// });
+
 
 
 app.post('/api/save/*', (req, res) => {
