@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+
+import { FaDownload, FaEye, FaPenSquare, FaTrash,   } from 'react-icons/fa';
 
 interface File {
   name: string;
@@ -106,13 +113,38 @@ const FileBrowser: React.FC = () => {
             )}
             <div className="ml-auto">
               {file.type === 'directory' ? (
-                <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
+                <HoverCard>
+                  <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
+                  <HoverCardContent>
+                    
+                    Delete
+                  </HoverCardContent>
+                </HoverCard>
               ) : (
                 <>
-                  <Button className='bg-yellow-600 hover:bg-yellow-700 ml-2'><a href={`/files/${file.path}`}>View</a></Button>
-                  <Button className='bg-green-600 hover:bg-green-700 ml-2'><a href={`/api/download/${file.path}`} download >Download</a></Button>
-                  <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">Edit</Button>
-                  <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">Delete</Button>
+              <HoverCard>
+                <HoverCardTrigger>
+                <a href={`/files/${file.path}`}> <Button className='bg-yellow-600 hover:bg-yellow-700 ml-2'><FaEye /></Button></a>
+                  </HoverCardTrigger>
+                  <HoverCardContent>View</HoverCardContent>
+                  </HoverCard>
+                <HoverCard>
+                <HoverCardTrigger> 
+                <a href={`/api/download/${file.path}`} download ><Button className='bg-green-600 hover:bg-green-700 ml-2'><FaDownload /></Button></a></HoverCardTrigger>
+                  <HoverCardContent>
+                  Download
+                  </HoverCardContent>
+                  </HoverCard>
+                 <HoverCard><HoverCardTrigger><Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700"><FaPenSquare /> </Button></HoverCardTrigger> <HoverCardContent>
+                  Edit
+                  </HoverCardContent></HoverCard> 
+                  
+                  <HoverCard>
+  <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
+  <HoverCardContent>
+    Delete
+  </HoverCardContent>
+</HoverCard>
                 </>
               )}
             </div>

@@ -21,6 +21,7 @@
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.24.0",
     "@monaco-editor/react": "^4.6.0",
+    "@radix-ui/react-hover-card": "^1.0.7",
     "@radix-ui/react-slot": "^1.0.2",
     "@uiw/react-codemirror": "^4.21.21",
     "axios": "^1.6.7",
@@ -30,6 +31,7 @@
     "react": "^18.2.0",
     "react-ace": "^10.1.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
     "react-router-dom": "^6.22.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7"
