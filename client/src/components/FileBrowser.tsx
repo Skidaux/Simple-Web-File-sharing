@@ -110,8 +110,11 @@ const FileBrowser: React.FC = () => {
     if (fileInputRef.current && fileInputRef.current.files) {
       const file = fileInputRef.current.files[0];
       const formData = new FormData();
-      formData.append('file', file);
       formData.append('directory', path);
+      formData.append('file', file);
+      
+      
+
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload', true);
@@ -147,7 +150,7 @@ const FileBrowser: React.FC = () => {
 <div className="p-4 flex flex-col">
 <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">Browsing: /{path}</h2>
-        <div>
+        <div className='flex'>
           <input type="file" ref={fileInputRef} className="mr-2" />
           <Button onClick={handleFileUpload} className="bg-blue-600 hover:bg-blue-700">
             Upload
@@ -159,7 +162,7 @@ const FileBrowser: React.FC = () => {
           )}
         </div>
         </div>
-      <div className="space-y-4">
+      <div className="space-y-2">
       {files.map((file) => (
   <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
     <div className="flex items-center flex-grow">
