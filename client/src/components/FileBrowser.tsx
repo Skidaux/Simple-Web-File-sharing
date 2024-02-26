@@ -26,7 +26,7 @@ import {
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile, FaUpload } from 'react-icons/fa';
 
 
 interface File {
@@ -235,7 +235,7 @@ const FileBrowser: React.FC = () => {
 
           <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <AlertDialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>Open</Button>
+              <Button onClick={() => setIsDialogOpen(true)} className='bg-blue-600 hover:bg-blue-700 px-8'><FaUpload /></Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
