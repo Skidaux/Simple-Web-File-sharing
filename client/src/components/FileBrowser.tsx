@@ -7,13 +7,16 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash,   } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock   } from 'react-icons/fa';
 
 interface File {
   name: string;
   type: 'directory' | 'file';
   path: string;
   size: string;
+}
+interface FileSizeUnits {
+  [unit: string]: number;
 }
 
 const FileBrowser: React.FC = () => {
@@ -93,6 +96,13 @@ const FileBrowser: React.FC = () => {
       setIsLoading(false);
     }
   };
+  const parseFileSize = (fileSize: string): number => {
+    if (!fileSize) return 0;
+    const units: FileSizeUnits = { B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3 };
+    const match = fileSize.match(/(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)/);
+    return match ? parseFloat(match[1]) * (units[match[2]] || 0) : 0;
+  };
+  
 
   return (
     <div className="p-4">
@@ -134,12 +144,21 @@ const FileBrowser: React.FC = () => {
                   <HoverCardContent>
                   Download
                   </HoverCardContent>
-                  </HoverCard>
-                 <HoverCard><HoverCardTrigger><Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700"><FaPenSquare /> </Button></HoverCardTrigger> <HoverCardContent>
-                  Edit
-                  </HoverCardContent></HoverCard> 
-                  
+
                   <HoverCard>
+  <HoverCardTrigger>
+    {parseFileSize(file.size) > 2048 ? (
+      <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500"><FaLock /></Button>
+    ) : (
+      <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700"><FaPenSquare /></Button>
+    )}
+  </HoverCardTrigger>
+  <HoverCardContent>
+    {parseFileSize(file.size) > 2048 ? 'Locked' : 'Edit'}
+  </HoverCardContent>
+</HoverCard>
+
+
   <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
   <HoverCardContent>
     Delete

@@ -65,6 +65,31 @@ app.get('/api/download/*', (req, res) => {
 
 
 
+app.get('/api/edit/*', (req, res) => {
+    const relativePath = req.params[0];
+    const filePath = path.join(__dirname, 'files', relativePath);
+
+    fs.stat(filePath, (err, stats) => {
+        if (err) {
+            console.error('Error accessing file:', err);
+            const status = err.code === 'ENOENT' ? 404 : 500;
+            return res.status(status).send('Error processing your request');
+        }
+
+        if (stats.size > 2048) {
+            return res.status(413).json({ error: 'File size exceeds 2 kilobytes' });
+        }
+
+        fs.readFile(filePath, 'utf8', (err, data) => {
+            if (err) {
+                console.error('Unable to read file:', err);
+                return res.status(500).send('Error processing your request');
+            }
+            res.json({ content: data, filename: path.basename(relativePath), filePath: relativePath });
+        });
+    });
+});
+
 
 app.get('/api/list/*', async (req, res) => {
     // Construct directory path from request
