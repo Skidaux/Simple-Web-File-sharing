@@ -160,66 +160,54 @@ const FileBrowser: React.FC = () => {
         </div>
         </div>
       <div className="space-y-4">
-        {files.map((file) => (
-          <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
-            {file.type === 'directory' ? (
-              <div className='flex'>
-                <Link to={`/browse/${file.path}`} className="text-blue-500 hover:underline">
-                <FaFolder /> {file.name}/ 
-                </Link>
-              </div>
-            ) : (
-              <div>
-                <span> <FaFile />{file.name} | {file.size}</span>
-              </div>
-            )}
-            <div className="ml-auto">
-              {file.type === 'directory' ? (
-                <HoverCard>
-                  <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
-                  <HoverCardContent>
-                    Delete
-                  </HoverCardContent>
-                </HoverCard>
-              ) : (
-                <>
-              <HoverCard>
-                <HoverCardTrigger>
-                <a href={`/files/${file.path}`}> <Button className='bg-yellow-600 hover:bg-yellow-700 ml-2'><FaEye /></Button></a>
-                  </HoverCardTrigger>
-                  <HoverCardContent>View</HoverCardContent>
-                  </HoverCard>
-                <HoverCard>
-                <HoverCardTrigger> 
-                <a href={`/api/download/${file.path}`} download ><Button className='bg-green-600 hover:bg-green-700 ml-2'><FaDownload /></Button></a></HoverCardTrigger>
-                  <HoverCardContent>
-                  Download
-                  </HoverCardContent>
+      {files.map((file) => (
+  <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
+    <div className="flex items-center flex-grow">
+      {file.type === 'directory' ? (
+        <Link to={`/browse/${file.path}`} className="text-blue-500 hover:underline flex items-center">
+          <FaFolder className="mr-2" /> {file.name}/
+        </Link>
+      ) : (
+        <span className="flex items-center">
+          <FaFile className="mr-2" /> {file.name} | {file.size}
+        </span>
+      )}
+    </div>
+    <div className="flex items-center">
+      {file.type === 'directory' ? (
+        <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+          <FaTrash />
+        </Button>
+      ) : (
+        <>
+          <a href={`/files/${file.path}`}>
+            <Button className="bg-yellow-600 hover:bg-yellow-700 ml-2">
+              <FaEye />
+            </Button>
+          </a>
+          <a href={`/api/download/${file.path}`} download>
+            <Button className="bg-green-600 hover:bg-green-700 ml-2">
+              <FaDownload />
+            </Button>
+          </a>
+          {parseFileSize(file.size) > 2048 ? (
+            <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
+              <FaLock />
+            </Button>
+          ) : (
+            <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
+              <FaPenSquare />
+            </Button>
+          )}
+          <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+            <FaTrash />
+          </Button>
+        </>
+      )}
+    </div>
+  </div>
+))}
 
-                  <HoverCard>
-  <HoverCardTrigger>
-    {parseFileSize(file.size) > 2048 ? (
-      <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500"><FaLock /></Button>
-    ) : (
-      <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700"><FaPenSquare /></Button>
-    )}
-  </HoverCardTrigger>
-  <HoverCardContent>
-    {parseFileSize(file.size) > 2048 ? 'Locked' : 'Edit'}
-  </HoverCardContent>
-</HoverCard>
-
-
-  <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
-  <HoverCardContent>
-    Delete
-  </HoverCardContent>
-</HoverCard>
-                </>
-              )}
-            </div>
-          </div>
-        ))}
       </div>
       {path && <Link to={goBackPath()} className="block mt-4 text-blue-500 hover:underline">Go Back</Link>}
     </div>
