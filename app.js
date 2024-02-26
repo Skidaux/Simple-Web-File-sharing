@@ -172,9 +172,10 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     if (req.file) {
         res.redirect(`/${req.body.directory || ''}`);
     } else {
-        res.status(400).send('No file uploaded.');
+        res.status(400).json({ error: 'No file uploaded.' });
     }
 });
+
 
 app.use('/files', express.static('files'))
 

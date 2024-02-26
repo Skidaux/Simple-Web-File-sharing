@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -6,8 +6,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { CircularProgressbar } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock   } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile   } from 'react-icons/fa';
 
 interface File {
   name: string;
@@ -25,6 +27,8 @@ const FileBrowser: React.FC = () => {
   const path = location.pathname.replace('/browse/', '') || '';
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -102,23 +106,71 @@ const FileBrowser: React.FC = () => {
     const match = fileSize.match(/(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)/);
     return match ? parseFloat(match[1]) * (units[match[2]] || 0) : 0;
   };
+  const handleFileUpload = () => {
+    if (fileInputRef.current && fileInputRef.current.files) {
+      const file = fileInputRef.current.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('directory', path);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload', true);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
+          setUploadProgress(progress);
+        }
+      };
+
+      xhr.onload = async () => {
+        if (xhr.status === 200) {
+          // Refresh the list of files after upload
+          await fetchFiles();
+        } else {
+          console.error('Failed to upload file:', xhr.responseText);
+        }
+        setUploadProgress(null); // Reset progress
+      };
+
+      xhr.onerror = () => {
+        console.error('Upload error');
+        setUploadProgress(null); // Reset progress
+      };
+
+      xhr.send(formData);
+    }
+  };
   
 
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-bold mb-4">Browsing: /{path}</h2>
+<div className="p-4 flex flex-col">
+<div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold">Browsing: /{path}</h2>
+        <div>
+          <input type="file" ref={fileInputRef} className="mr-2" />
+          <Button onClick={handleFileUpload} className="bg-blue-600 hover:bg-blue-700">
+            Upload
+          </Button>
+          {uploadProgress !== null && (
+            <div style={{ width: 50, height: 50, marginLeft: 10 }}>
+              <CircularProgressbar value={uploadProgress} text={`${Math.round(uploadProgress)}%`} />
+            </div>
+          )}
+        </div>
+        </div>
       <div className="space-y-4">
         {files.map((file) => (
           <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
             {file.type === 'directory' ? (
-              <div>
+              <div className='flex'>
                 <Link to={`/browse/${file.path}`} className="text-blue-500 hover:underline">
-                  {file.name}/
+                <FaFolder /> {file.name}/ 
                 </Link>
               </div>
             ) : (
               <div>
-                <span>{file.name} {file.size}</span>
+                <span> <FaFile />{file.name} | {file.size}</span>
               </div>
             )}
             <div className="ml-auto">
@@ -126,7 +178,6 @@ const FileBrowser: React.FC = () => {
                 <HoverCard>
                   <HoverCardTrigger><Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700"><FaTrash /></Button></HoverCardTrigger>
                   <HoverCardContent>
-                    
                     Delete
                   </HoverCardContent>
                 </HoverCard>
