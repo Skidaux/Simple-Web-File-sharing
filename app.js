@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 const cors = require('cors')
-const multer  = require('multer');
+const multer = require('multer');
 
 
 app.use(cors());
