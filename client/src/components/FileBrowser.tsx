@@ -2,10 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
@@ -230,9 +235,31 @@ const FileBrowser: React.FC = () => {
                       <FaPenSquare />
                     </Button>
                   )}
-                  <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
-                    <FaTrash />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
+                      <FaTrash />
+                    </Button></DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Delete '{file.name}'</DialogTitle>
+                        <DialogDescription className=''>
+                          <p>Are you sure you want delete this file stored on: /{file.path}</p>
+                          <div className='space-x-10 mx-4 flex justify-center'>
+                            <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+                              <FaTrash />  Delete
+                            </Button>
+                            <DialogClose asChild>
+                              <Button type="button" variant="secondary">
+                                Close
+                              </Button>
+                            </DialogClose>
+                          </div>
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
+
+
                 </>
               )}
             </div>
