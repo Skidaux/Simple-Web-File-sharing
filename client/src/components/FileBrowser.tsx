@@ -26,7 +26,7 @@ import {
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile, FaUpload } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile, FaUpload, FaCheckCircle } from 'react-icons/fa';
 
 
 interface File {
@@ -266,7 +266,7 @@ const FileBrowser: React.FC = () => {
 
                       <CircularProgressbar value={uploadProgress} text={`${Math.round(uploadProgress)}%`} className='w-20 h-20' />
 
-                      <div className="text-sm mt-2">
+                      <div className="text-sm mt-1">
                         <div>Speed: {uploadSpeed ? `${formatSize(uploadSpeed)}/s` : 'N/A'}</div>
                         <div>Uploaded: {uploadedData ? formatSize(uploadedData) : 'N/A'}</div>
                         <div>File Size: {fileSize ? formatSize(fileSize) : 'N/A'}</div>
@@ -274,7 +274,7 @@ const FileBrowser: React.FC = () => {
                     </div>
                   )}
                   {isUploadComplete && (
-                    <div className="mt-4 text-green-600 font-semibold">Upload finished!</div>
+                    <div className="mt-4 text-green-600 font-semibold flex justify-center">Upload finished! <FaCheckCircle className='mx-1 mt-1' /></div>
                   )}
                 </AlertDialogDescription>
               </AlertDialogHeader>
