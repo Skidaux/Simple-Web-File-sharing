@@ -53,6 +53,8 @@ const FileBrowser: React.FC = () => {
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isUploadComplete, setIsUploadComplete] = useState<boolean>(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
 
 
 
@@ -231,9 +233,9 @@ const FileBrowser: React.FC = () => {
         <h2 className="text-lg font-bold">Browsing: /{path}</h2>
         <div className='flex'>
 
-          <AlertDialog>
+          <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <AlertDialogTrigger asChild>
-              <Button>Open</Button>
+              <Button onClick={() => setIsDialogOpen(true)}>Open</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
