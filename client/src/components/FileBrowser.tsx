@@ -16,6 +16,7 @@ import 'react-circular-progressbar/dist/styles.css';
 
 import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile } from 'react-icons/fa';
 
+
 interface File {
   name: string;
   type: 'directory' | 'file';
@@ -216,7 +217,7 @@ const FileBrowser: React.FC = () => {
                 </Button>
               ) : (
                 <>
-                  <a href={`/files/${file.path}`}>
+                  <a href={`/files/${file.path}`} target='_blank'>
                     <Button className="bg-yellow-600 hover:bg-yellow-700 ml-2">
                       <FaEye />
                     </Button>
