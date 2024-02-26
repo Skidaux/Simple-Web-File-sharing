@@ -93,9 +93,9 @@ const FileBrowser: React.FC = () => {
 
   const handleDelete = async (filePath: string) => {
     // Confirm before deleting
-    if (!window.confirm(`Are you sure you want to delete "${filePath}"?`)) {
-      return;
-    }
+    // if (!window.confirm(`Are you sure you want to delete "${filePath}"?`)) {
+    //   return;
+    // }
 
     try {
       const response = await fetch(`/api/delete/${filePath}`, {
@@ -307,9 +307,29 @@ const FileBrowser: React.FC = () => {
             </div>
             <div className="flex items-center">
               {file.type === 'directory' ? (
-                <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+                <Dialog>
+                <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
                   <FaTrash />
-                </Button>
+                </Button></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete '{file.name}'</DialogTitle>
+                    <DialogDescription className=''>
+                      <p>Are you sure you want delete this file stored on: \{file.path}</p>
+                      <div className='space-x-10 mx-4 flex justify-center'>
+                        <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+                          <FaTrash />  Delete
+                        </Button>
+                        <DialogClose asChild>
+                          <Button type="button" variant="secondary">
+                            Close
+                          </Button>
+                        </DialogClose>
+                      </div>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
               ) : (
                 <>
                   <a href={`/files/${file.path}`} target='_blank'>
@@ -339,7 +359,7 @@ const FileBrowser: React.FC = () => {
                       <DialogHeader>
                         <DialogTitle>Delete '{file.name}'</DialogTitle>
                         <DialogDescription className=''>
-                          <p>Are you sure you want delete this file stored on: /{file.path}</p>
+                          <p>Are you sure you want delete this file stored on: \{file.path}</p>
                           <div className='space-x-10 mx-4 flex justify-center'>
                             <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
                               <FaTrash />  Delete
