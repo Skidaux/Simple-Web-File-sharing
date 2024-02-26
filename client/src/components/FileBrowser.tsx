@@ -10,6 +10,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -38,6 +50,11 @@ const FileBrowser: React.FC = () => {
   const [uploadSpeed, setUploadSpeed] = useState<number | null>(null);
   const [uploadedData, setUploadedData] = useState<number | null>(null);
   const [fileSize, setFileSize] = useState<number | null>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [isUploadComplete, setIsUploadComplete] = useState<boolean>(false);
+
+
 
   const formatSize = (size: number): string => {
     if (size < 1024) {
@@ -127,6 +144,9 @@ const FileBrowser: React.FC = () => {
     const match = fileSize.match(/(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)/);
     return match ? parseFloat(match[1]) * (units[match[2]] || 0) : 0;
   };
+
+
+
   const handleFileUpload = () => {
     if (fileInputRef.current && fileInputRef.current.files) {
       const file = fileInputRef.current.files[0];
@@ -135,6 +155,7 @@ const FileBrowser: React.FC = () => {
       formData.append('file', file);
 
       setFileSize(file.size);
+      setIsUploadComplete(false); // Reset upload completion status
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload', true);
@@ -156,17 +177,16 @@ const FileBrowser: React.FC = () => {
       xhr.onload = async () => {
         if (xhr.status === 200) {
           await fetchFiles();
+          setIsUploadComplete(true); // Set upload completion status to true
         } else {
           console.error('Failed to upload file:', xhr.responseText);
         }
-        setUploadProgress(null);
-        setUploadSpeed(null);
-        setUploadedData(null);
-        setFileSize(null);
+        // Do not reset the progress state variables here
       };
 
       xhr.onerror = () => {
         console.error('Upload error');
+        // Reset the progress state variables on error
         setUploadProgress(null);
         setUploadSpeed(null);
         setUploadedData(null);
@@ -176,24 +196,97 @@ const FileBrowser: React.FC = () => {
       xhr.send(formData);
     }
   };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (dropZoneRef.current) {
+      dropZoneRef.current.classList.add('bg-gray-50', 'border-gray-400');
+    }
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFileName(e.target.files[0].name);
+    }
+  };
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (dropZoneRef.current) {
+      dropZoneRef.current.classList.remove('bg-gray-50', 'border-gray-400');
+    }
+  };
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (dropZoneRef.current) {
+      dropZoneRef.current.classList.remove('bg-gray-50', 'border-gray-400');
+    }
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setSelectedFileName(e.dataTransfer.files[0].name);
+      e.dataTransfer.clearData();
+    }
+  };
+
 
   return (
     <div className="p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold">Browsing: /{path}</h2>
         <div className='flex'>
-          <input type="file" ref={fileInputRef} className="mr-2" />
-          <Button onClick={handleFileUpload} className="bg-blue-600 hover:bg-blue-700">
-            Upload
-          </Button>
-          {uploadProgress !== null && (
-            <div style={{ width: 90, height: 50, marginLeft: 10 }}>
-              <CircularProgressbar value={uploadProgress} text={`${Math.round(uploadProgress)}%`} />
-              <div>Speed: {uploadSpeed ? `${formatSize(uploadSpeed)}/s` : 'N/A'}</div>
-              <div>Uploaded: {uploadedData ? formatSize(uploadedData) : 'N/A'}</div>
-              <div>File Size: {fileSize ? formatSize(fileSize) : 'N/A'}</div>
-            </div>
-          )}
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button>Open</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Upload a file</AlertDialogTitle>
+                <AlertDialogDescription>
+                  <div
+                    ref={dropZoneRef}
+                    className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 hover:bg-gray-50"
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    {selectedFileName ? (
+                      <p className="text-gray-700">{selectedFileName}</p>
+                    ) : (
+                      <p className="text-gray-500">Drag and drop files here, or click to select files</p>
+                    )}
+                  </div>
+                  {uploadProgress !== null && (
+                    <div className="mt-4 flex space-x-8 justify-center">
+
+                      <CircularProgressbar value={uploadProgress} text={`${Math.round(uploadProgress)}%`} className='w-20 h-20' />
+
+                      <div className="text-sm mt-2">
+                        <div>Speed: {uploadSpeed ? `${formatSize(uploadSpeed)}/s` : 'N/A'}</div>
+                        <div>Uploaded: {uploadedData ? formatSize(uploadedData) : 'N/A'}</div>
+                        <div>File Size: {fileSize ? formatSize(fileSize) : 'N/A'}</div>
+                      </div>
+                    </div>
+                  )}
+                  {isUploadComplete && (
+                    <div className="mt-4 text-green-600 font-semibold">Upload finished!</div>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel asChild>
+                  <Button className='bg-white text-black'>Cancel</Button>
+                </AlertDialogCancel>
+                <Button onClick={handleFileUpload} className="bg-blue-600 hover:bg-blue-700">
+                  Upload
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
         </div>
       </div>
       <div className="space-y-2">
