@@ -49,7 +49,11 @@ const isTextFile = (buffer) => {
 
 const readDirectory = async (dirPath) => {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
+    const directories = [];
     const files = [];
+
+    // Sort entries by name
+    entries.sort((a, b) => a.name.localeCompare(b.name));
 
     for (let dirent of entries) {
         const itemPath = path.join(dirPath, dirent.name).replace(/\\/g, '/');
@@ -63,16 +67,26 @@ const readDirectory = async (dirPath) => {
             isText = isTextFile(fileBuffer);
         }
 
-        files.push({
-            name: dirent.name,
-            type: dirent.isDirectory() ? 'directory' : 'file',
-            path: dirent.isDirectory() ? `${relativePath}/` : relativePath,
-            size: dirent.isDirectory() ? null : fileSize,
-            isText: dirent.isDirectory() ? null : isText,
-        });
+        if (dirent.isDirectory()) {
+            directories.push({
+                name: dirent.name,
+                type: 'directory',
+                path: `${relativePath}/`,
+                size: null,
+                isText: null,
+            });
+        } else {
+            files.push({
+                name: dirent.name,
+                type: 'file',
+                path: relativePath,
+                size: fileSize,
+                isText: isText,
+            });
+        }
     }
 
-    return files;
+    return [...directories, ...files];
 };
 
 
@@ -229,18 +243,28 @@ app.post('/api/create', (req, res) => {
 
 
 app.use('/files', express.static('files'))
+app.use(express.static(path.join(__dirname, 'dist'), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+    },
+  }));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+
+// const options = {
+//     key: fs.readFileSync("priv.pem"),
+//     cert: fs.readFileSync("cert.pem")
+// };
 
 
-const options = {
-    key: fs.readFileSync("priv.pem"),
-    cert: fs.readFileSync("cert.pem")
-};
-
-
-//Opening the server with the http/s protocol
-https.createServer(options, app).listen(443, () => {
-    console.log(`Server started on port 443`);
-});
+// //Opening the server with the http/s protocol
+// https.createServer(options, app).listen(443, () => {
+//     console.log(`Server started on port 443`);
+// });
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
