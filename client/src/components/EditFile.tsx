@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMatch } from 'react-router-dom';
 import AceEditor from "react-ace";
+import { Button } from "@/components/ui/button"
+
 
 // Import language tools for auto-completion and snippets
 import "ace-builds/src-noconflict/ext-language_tools";
@@ -53,7 +55,7 @@ const EditFile: React.FC = () => {
     fetchFileContent();
   }, [params.filePath]); // Depend on params.filePath directly
 
-  const handleAceChange = (newContent) => {
+  const handleAceChange = (newContent: string) => {
     setContent(newContent);
   };
 
@@ -101,10 +103,18 @@ const EditFile: React.FC = () => {
   }
 
   return (
-    <div>
-      <h2>Editing: {filePath}</h2>
+    <div className="flex flex-col h-screen">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-white">
+        <h2 className="text-lg font-bold">Editing: /{filePath}</h2>
+        <div>
+          <Button className="bg-green-600 hover:bg-green-700 mr-2" onClick={saveFile}>Save</Button>
+          <Button className="bg-red-600 hover:bg-red-700" onClick={saveFile}>Cancel</Button>
+        </div>
+      </div>
       <AceEditor
-        height="100px"
+        className="flex-1"
+        width="100%"
+        height="100%"
         value={content}
         mode={mode} // Use the dynamically determined mode
         theme="monokai"
@@ -119,9 +129,8 @@ const EditFile: React.FC = () => {
           tabSize: 2,
         }}
       />
-  
-      <button onClick={saveFile}>Save</button>
     </div>
+
   );
 };
 
