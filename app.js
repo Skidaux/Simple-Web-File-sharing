@@ -72,11 +72,14 @@ app.get('/api/download/*', (req, res) => {
     const filePath = path.join(__dirname, 'files', req.params[0]);
     res.download(filePath, (err) => {
         if (err) {
-            console.error('File download failed:', err);
-            return res.status(500).send('Server Error');
+            if (!res.headersSent) {
+                console.error('File download failed:', err);
+                res.status(500).json({ error: "Download failed" });
+            }
         }
     });
 });
+
 
 
 

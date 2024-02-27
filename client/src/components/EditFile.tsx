@@ -106,6 +106,12 @@ const EditFile: React.FC = () => {
   };
 
   const discardChanges = () => {
+    if (unsavedChanges) {
+      const discardconfirm = window.confirm('Are you sure to discard changes');
+      if (!discardconfirm) {
+        return;
+      }
+    }
     setContent(savedContent); // Reset content to the saved state
     setUnsavedChanges(false);
   };
