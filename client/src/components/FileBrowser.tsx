@@ -26,8 +26,8 @@ import {
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFile, FaUpload, FaCheckCircle } from 'react-icons/fa';
-
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFileAlt, FaUpload, FaCheckCircle, FaFolderOpen } from 'react-icons/fa';
+import { FcOpenedFolder } from "react-icons/fc";
 
 interface File {
   name: string;
@@ -229,9 +229,10 @@ const FileBrowser: React.FC = () => {
 
 
   return (
+    
     <div className="p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">Browsing: /{path}</h2>
+        <h2 className="text-lg font-bold flex"><FcOpenedFolder className='mx-3 w-7 h-7' />Browsing: /{path}</h2>
         <div className='flex'>
 
           <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -302,7 +303,7 @@ const FileBrowser: React.FC = () => {
                 </Link>
               ) : (
                 <span className="flex items-center">
-                  <FaFile className="mr-2" /> {file.name} | {file.size}
+                  <FaFileAlt className="mr-2" /> {file.name} | {file.size}
                 </span>
               )}
             </div>
@@ -314,9 +315,9 @@ const FileBrowser: React.FC = () => {
                 </Button></DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Delete '{file.name}'</DialogTitle>
+                    <DialogTitle>Delete '/{file.name}'</DialogTitle>
                     <DialogDescription className=''>
-                      <p>Are you sure you want delete this file stored on: \{file.path}</p>
+                      <p>Are you sure you want delete this folder stored: '/{path}{file.name}'. All it's subdirectories and files will be deleted</p>
                       <div className='space-x-10 mx-4 flex justify-center'>
                         <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
                           <FaTrash />  Delete
@@ -361,7 +362,7 @@ const FileBrowser: React.FC = () => {
                       <DialogHeader>
                         <DialogTitle>Delete '{file.name}'</DialogTitle>
                         <DialogDescription className=''>
-                          <p>Are you sure you want delete this file stored on: \{file.path}</p>
+                          <p>Are you sure you want delete this file stored on: /{path}{file.name}</p>
                           <div className='space-x-10 mx-4 flex justify-center'>
                             <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
                               <FaTrash />  Delete
