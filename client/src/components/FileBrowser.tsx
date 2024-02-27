@@ -342,7 +342,7 @@ const FileBrowser: React.FC = () => {
                       <FaDownload />
                     </Button>
                   </a>
-                  {parseFileSize(file.size) > 2048 ? (
+                  {parseFileSize(file.size) > 16384 ? (
                     <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
                       <FaLock />
                     </Button>

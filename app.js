@@ -5,7 +5,7 @@ const fs = require('fs');
 const app = express();
 const cors = require('cors')
 const multer = require('multer');
-
+const mime = require('mime-types');
 
 app.use(cors());
 
@@ -26,31 +26,41 @@ const formatFileSize = (bytes) => {
     }
 };
 
+const isTextFile = (buffer) => {
+    // Check if the buffer contains only printable characters (and whitespace)
+    return buffer.toString('ascii').split('').every(char => {
+        const code = char.charCodeAt(0);
+        return (code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13;
+    });
+};
+
 const readDirectory = async (dirPath) => {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
     const files = [];
 
     for (let dirent of entries) {
-        const itemPath = path.join(dirPath, dirent.name).replace(/\\/g, '/'); // Ensure forward slashes
-        // Only append the name and type, construct relative path for each item
+        const itemPath = path.join(dirPath, dirent.name).replace(/\\/g, '/');
         const relativePath = path.relative(__dirname + '/files', itemPath);
-        const stats = await fs.promises.stat(itemPath); // Get file stats
-        const fileSize = formatFileSize(stats.size); // Format file size
+        const stats = await fs.promises.stat(itemPath);
+        const fileSize = formatFileSize(stats.size);
+
+        let isText = null;
+        if (!dirent.isDirectory()) {
+            const fileBuffer = await fs.promises.readFile(itemPath);
+            isText = isTextFile(fileBuffer);
+        }
+
         files.push({
             name: dirent.name,
             type: dirent.isDirectory() ? 'directory' : 'file',
-            // Append '/' to directories to indicate it's a directory
             path: dirent.isDirectory() ? `${relativePath}/` : relativePath,
-            size: dirent.isDirectory() ? null : fileSize, // Add size for files, null for directories
+            size: dirent.isDirectory() ? null : fileSize,
+            isText: dirent.isDirectory() ? null : isText,
         });
     }
 
     return files;
 };
-
-
-
-
 
 
 app.get('/api/download/*', (req, res) => {
@@ -76,7 +86,7 @@ app.get('/api/edit/*', (req, res) => {
             return res.status(status).send('Error processing your request');
         }
 
-        if (stats.size > 2048) {
+        if (stats.size > 16384) {
             return res.status(413).json({ error: 'File size exceeds 2 kilobytes' });
         }
 
