@@ -134,3 +134,5 @@ node_modules/
 files/
 client/node_modules/
 client/package-lock.json
+priv.pem
+cert.pem

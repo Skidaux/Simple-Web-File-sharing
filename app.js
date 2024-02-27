@@ -5,12 +5,20 @@ const fs = require('fs');
 const app = express();
 const cors = require('cors')
 const multer = require('multer');
-const mime = require('mime-types');
-
+const https = require('https');
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+
+// app.use((req, res, next) => {
+//     if (!req.secure) {
+//         return res.redirect(`https://localhost${req.url}`);
+//         // return res.redirect(`https://${req.headers.host}${req.url}`);
+//     }
+//     next();
+// });
 
 app.set('view engine', 'ejs');
 
@@ -222,6 +230,17 @@ app.post('/api/create', (req, res) => {
 
 app.use('/files', express.static('files'))
 
+
+const options = {
+    key: fs.readFileSync("priv.pem"),
+    cert: fs.readFileSync("cert.pem")
+};
+
+
+//Opening the server with the http/s protocol
+https.createServer(options, app).listen(443, () => {
+    console.log(`Server started on port 443`);
+});
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
