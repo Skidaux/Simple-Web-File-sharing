@@ -34,6 +34,7 @@ interface File {
   type: 'directory' | 'file';
   path: string;
   size: string;
+  isText: boolean | null;
 }
 interface FileSizeUnits {
   [unit: string]: number;
@@ -342,15 +343,16 @@ const FileBrowser: React.FC = () => {
                       <FaDownload />
                     </Button>
                   </a>
-                  {parseFileSize(file.size) > 16384 ? (
-                    <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
-                      <FaLock />
-                    </Button>
-                  ) : (
-                    <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
-                      <FaPenSquare />
-                    </Button>
-                  )}
+                  {file.isText && parseFileSize(file.size) <= 16384 ? (
+  <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
+    <FaPenSquare />
+  </Button>
+) : (
+  <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
+    <FaLock />
+  </Button>
+)}
+
                   <Dialog>
                     <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
                       <FaTrash />
