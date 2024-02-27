@@ -186,6 +186,31 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     }
 });
 
+app.post('/api/create', (req, res) => {
+    const { type, directory, name, content } = req.body;
+    const filePath = path.join(__dirname, 'files', directory, name);
+
+    if (type === 'file') {
+        fs.writeFile(filePath, content, (err) => {
+            if (err) {
+                console.error('Unable to create file:', err);
+                return res.status(500).json({ success: false, message: 'Server Error' });
+            }
+            res.json({ success: true, message: 'File created successfully' });
+        });
+    } else if (type === 'directory') {
+        fs.mkdir(filePath, { recursive: true }, (err) => {
+            if (err) {
+                console.error('Unable to create folder:', err);
+                return res.status(500).json({ success: false, message: 'Server Error' });
+            }
+            res.json({ success: true, message: 'Folder created successfully' });
+        });
+    } else {
+        res.status(400).json({ success: false, message: 'Invalid request' });
+    }
+});
+
 
 app.use('/files', express.static('files'))
 

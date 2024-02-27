@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+import CreateFileDialog from './CreateFileDialog';
 
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -226,7 +227,27 @@ const FileBrowser: React.FC = () => {
       e.dataTransfer.clearData();
     }
   };
+  const handleCreateFileOrFolder = async (name: string, type: 'file' | 'directory') => {
+    const response = await fetch('/api/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        type,
+        directory: path,
+        name,
+        content: type === 'file' ? '' : null
+      })
+    });
 
+    if (!response.ok) {
+      console.error('Failed to create file/folder:', response.statusText);
+      return;
+    }
+
+    await fetchFiles(); // Refresh the list of files
+  };
 
   return (
     
@@ -234,7 +255,7 @@ const FileBrowser: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-bold flex"><FcOpenedFolder className='mx-3 w-7 h-7' />Browsing: /{path}</h2>
         <div className='flex'>
-
+        <CreateFileDialog onCreate={handleCreateFileOrFolder} />
           <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button onClick={() => setIsDialogOpen(true)} className='bg-blue-600 hover:bg-blue-700 px-8'><FaUpload /></Button>
