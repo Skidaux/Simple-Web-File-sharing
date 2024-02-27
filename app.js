@@ -27,12 +27,17 @@ const formatFileSize = (bytes) => {
 };
 
 const isTextFile = (buffer) => {
-    // Check if the buffer contains only printable characters (and whitespace)
-    return buffer.toString('ascii').split('').every(char => {
+    // Limit the buffer size to prevent ERR_STRING_TOO_LONG
+    const maxBufferSize = 1024 * 1024; // 1MB
+    const limitedBuffer = buffer.slice(0, maxBufferSize);
+
+    // Check if the limited buffer contains only printable characters (and whitespace)
+    return limitedBuffer.toString('ascii').split('').every(char => {
         const code = char.charCodeAt(0);
         return (code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13;
     });
 };
+
 
 const readDirectory = async (dirPath) => {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
