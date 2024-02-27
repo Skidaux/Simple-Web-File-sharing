@@ -22,6 +22,7 @@ const EditFile: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fileExtension, setFileExtension] = useState<string>(''); // Add state for file extension
   const [savedContent, setSavedContent] = useState<string>('');
+  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   useEffect(() => {
     // Assert that filePath exists and is a string
     if (!filePath) {
@@ -58,6 +59,7 @@ const EditFile: React.FC = () => {
 
   const handleAceChange = (newContent: string) => {
     setContent(newContent);
+    setUnsavedChanges(true);
   };
 
   const saveFile = async () => {
@@ -80,6 +82,7 @@ const EditFile: React.FC = () => {
       }
       console.log('File saved successfully');
       setSavedContent(content);
+      setUnsavedChanges(false);
       // Navigate or show success message as needed
     } catch (error) {
       console.error('Failed to save file:', error);
@@ -88,13 +91,35 @@ const EditFile: React.FC = () => {
 
   const discardChanges = () => {
     setContent(savedContent); // Reset content to the saved state
+    setUnsavedChanges(false);
   };
 
   const Browse = () => {
+    if (unsavedChanges) {
+      const confirmNavigation = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+      if (!confirmNavigation) {
+        return;
+      }
+    }
     const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
     navigate(`/browse/${directoryPath}`);
   };
 
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (unsavedChanges) {
+        event.preventDefault();
+        event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [unsavedChanges]);
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -113,7 +138,6 @@ const EditFile: React.FC = () => {
       mode = 'text'; // Default to plain text
       break;
   }
-
 
   return (
     <div className="flex flex-col h-screen">
