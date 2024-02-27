@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMatch } from 'react-router-dom';
 import AceEditor from "react-ace";
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+
 
 
 // Import language tools for auto-completion and snippets
@@ -23,6 +25,9 @@ const EditFile: React.FC = () => {
   const [fileExtension, setFileExtension] = useState<string>(''); // Add state for file extension
   const [savedContent, setSavedContent] = useState<string>('');
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
+  const { toast } = useToast();
+
   useEffect(() => {
     // Assert that filePath exists and is a string
     if (!filePath) {
@@ -83,6 +88,12 @@ const EditFile: React.FC = () => {
       console.log('File saved successfully');
       setSavedContent(content);
       setUnsavedChanges(false);
+      // This should be outside the saveFile function
+      toast({
+        variant: "success",
+        title: "File saved",
+        description: "The file has been successfully saved.",
+      });
       // Navigate or show success message as needed
     } catch (error) {
       console.error('Failed to save file:', error);
@@ -121,6 +132,8 @@ const EditFile: React.FC = () => {
     };
   }, [unsavedChanges]);
 
+
+
   if (isLoading) return <div>Loading...</div>;
 
   let mode = ''; // Initialize mode variable
@@ -147,6 +160,7 @@ const EditFile: React.FC = () => {
           <Button className="bg-green-600 hover:bg-green-700 mr-2" onClick={saveFile}>Save</Button>
           <Button className="bg-red-600 hover:bg-red-700 mr-2" onClick={discardChanges}>Discard</Button>
           <Button className="bg-blue-600 hover:bg-blue-700 mr-2" onClick={Browse}>Go Back</Button>
+
         </div>
       </div>
       <AceEditor

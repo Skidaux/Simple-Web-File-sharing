@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import FileBrowser from './components/FileBrowser'; // Adjust the path as necessary
 import { Link } from 'react-router-dom';
 import EditFile from './components/EditFile';
+import { Toaster } from "@/components/ui/toaster"
 
 const App: React.FC = () => {
   return (
@@ -18,8 +19,13 @@ const App: React.FC = () => {
             <Link to="/browse/">Start Browsing</Link>
           </div>
         } />
+
       </Routes>
+      <Toaster />
     </Router>
+
+
+
   );
 };
 
