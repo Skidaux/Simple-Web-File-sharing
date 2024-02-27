@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
-  AlertDialogAction,
+
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -27,7 +27,7 @@ import CreateFileDialog from './CreateFileDialog';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFileAlt, FaUpload, FaCheckCircle, FaFolderOpen } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFileAlt, FaUpload, FaCheckCircle } from 'react-icons/fa';
 import { FcOpenedFolder } from "react-icons/fc";
 
 interface File {
