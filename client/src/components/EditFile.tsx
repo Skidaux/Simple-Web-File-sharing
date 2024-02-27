@@ -97,6 +97,11 @@ const EditFile: React.FC = () => {
       // Navigate or show success message as needed
     } catch (error) {
       console.error('Failed to save file:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to save file",
+        description: "Error saving File",
+      });
     }
   };
 
