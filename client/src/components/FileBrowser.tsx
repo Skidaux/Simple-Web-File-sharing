@@ -56,6 +56,7 @@ const FileBrowser: React.FC = () => {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isUploadComplete, setIsUploadComplete] = useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const segments = path.split('/');
 
 
 
@@ -250,12 +251,19 @@ const FileBrowser: React.FC = () => {
   };
 
   return (
-    
+
     <div className="p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold flex"><FcOpenedFolder className='mx-3 w-7 h-7' />Browsing: /{path}</h2>
+        <h2 className="text-lg font-bold flex"><FcOpenedFolder className='mx-3 w-7 h-7' />Browsing: <code className='mb-3 text-2xl'><Link className="text-teal-500 " to={`/browse/`}>/</Link></code>{segments.map((segment, index) => (
+          <React.Fragment key={segment}>
+            {index > 0 && '/'}
+            <Link className="text-blue-600 hover:underline mx-1" to={`/browse/${segments.slice(0, index + 1).join('/')}`}>
+              {segment || ''}
+            </Link>
+          </React.Fragment>
+        ))}</h2>
         <div className='flex'>
-        <CreateFileDialog onCreate={handleCreateFileOrFolder} />
+          <CreateFileDialog onCreate={handleCreateFileOrFolder} />
           <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button onClick={() => setIsDialogOpen(true)} className='bg-blue-600 hover:bg-blue-700 px-8'><FaUpload /></Button>
@@ -331,28 +339,28 @@ const FileBrowser: React.FC = () => {
             <div className="flex items-center">
               {file.type === 'directory' ? (
                 <Dialog>
-                <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
-                  <FaTrash />
-                </Button></DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Delete '/{file.name}'</DialogTitle>
-                    <DialogDescription className=''>
-                      <p>Are you sure you want delete this folder stored: '/{path}{file.name}'. All it's subdirectories and files will be deleted</p>
-                      <div className='space-x-10 mx-4 flex justify-center'>
-                        <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
-                          <FaTrash />  Delete
-                        </Button>
-                        <DialogClose asChild>
-                          <Button type="button" variant="secondary">
-                            Close
+                  <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
+                    <FaTrash />
+                  </Button></DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Delete '/{file.name}'</DialogTitle>
+                      <DialogDescription className=''>
+                        <p>Are you sure you want delete this folder stored: '/{path}{file.name}'. All it's subdirectories and files will be deleted</p>
+                        <div className='space-x-10 mx-4 flex justify-center'>
+                          <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
+                            <FaTrash />  Delete
                           </Button>
-                        </DialogClose>
-                      </div>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
+                          <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                              Close
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
               ) : (
                 <>
                   <a href={`/files/${file.path}`} target='_blank'>
@@ -366,14 +374,14 @@ const FileBrowser: React.FC = () => {
                     </Button>
                   </a>
                   {file.isText && parseFileSize(file.size) <= 16384 ? (
-  <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
-    <FaPenSquare />
-  </Button>
-) : (
-  <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
-    <FaLock />
-  </Button>
-)}
+                    <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
+                      <FaPenSquare />
+                    </Button>
+                  ) : (
+                    <Button className="ml-2 bg-gray-400 cursor-not-allowed hover:bg-gray-500">
+                      <FaLock />
+                    </Button>
+                  )}
 
                   <Dialog>
                     <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">

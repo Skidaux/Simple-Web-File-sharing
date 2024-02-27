@@ -21,7 +21,7 @@ const EditFile: React.FC = () => {
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fileExtension, setFileExtension] = useState<string>(''); // Add state for file extension
-
+  const [savedContent, setSavedContent] = useState<string>('');
   useEffect(() => {
     // Assert that filePath exists and is a string
     if (!filePath) {
@@ -40,6 +40,7 @@ const EditFile: React.FC = () => {
         }
         const data = await response.json();
         setContent(data.content);
+        setSavedContent(data.content);
 
         // Extract file extension from filename
         const filename = data.filename || '';
@@ -78,11 +79,22 @@ const EditFile: React.FC = () => {
         throw new Error(`Failed to save the file: ${response.statusText}`);
       }
       console.log('File saved successfully');
+      setSavedContent(content);
       // Navigate or show success message as needed
     } catch (error) {
       console.error('Failed to save file:', error);
     }
   };
+
+  const discardChanges = () => {
+    setContent(savedContent); // Reset content to the saved state
+  };
+
+  const Browse = () => {
+    const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
+    navigate(`/browse/${directoryPath}`);
+  };
+
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -102,13 +114,15 @@ const EditFile: React.FC = () => {
       break;
   }
 
+
   return (
     <div className="flex flex-col h-screen">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-800 text-white">
         <h2 className="text-lg font-bold">Editing: /{filePath}</h2>
         <div>
           <Button className="bg-green-600 hover:bg-green-700 mr-2" onClick={saveFile}>Save</Button>
-          <Button className="bg-red-600 hover:bg-red-700" onClick={saveFile}>Cancel</Button>
+          <Button className="bg-red-600 hover:bg-red-700 mr-2" onClick={discardChanges}>Discard</Button>
+          <Button className="bg-blue-600 hover:bg-blue-700 mr-2" onClick={Browse}>Go Back</Button>
         </div>
       </div>
       <AceEditor
