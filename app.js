@@ -39,11 +39,34 @@ const isTextFile = (buffer) => {
     const maxBufferSize = 1024 * 1024; // 1MB
     const limitedBuffer = buffer.slice(0, maxBufferSize);
 
-    // Check if the limited buffer contains only printable characters (and whitespace)
-    return limitedBuffer.toString('ascii').split('').every(char => {
+    // Convert the buffer to a UTF-8 encoded string
+    const utf8String = limitedBuffer.toString('utf8');
+
+    // Check if the file contains fewer than 20 characters
+    if (utf8String.length < 20) {
+        return true; // Treat as text file
+    }
+
+    // Count the occurrences of text characters, emojis, and other special symbols
+    let textCount = 0;
+    let specialCount = 0;
+
+    for (const char of utf8String) {
         const code = char.charCodeAt(0);
-        return (code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13;
-    });
+        if ((code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13) {
+            textCount++;
+        } else {
+            specialCount++;
+        }
+    }
+
+    // Calculate the ratio of text characters to emojis and other special symbols
+    const totalCharacters = textCount + specialCount;
+    const textRatio = textCount / totalCharacters;
+    const specialRatio = specialCount / totalCharacters;
+
+    // Check if the text ratio is greater than or equal to 3:1
+    return textRatio >= 0.75 && specialRatio <= 0.25;
 };
 
 
