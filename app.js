@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 //     next();
 // });
 
-//app.use('checkHost')
+//app.use(checkHost)
 
 app.set('view engine', 'ejs');
 
