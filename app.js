@@ -11,6 +11,23 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// const allowedHost = 'domain_here.com';
+// function (req, res, next) {
+//     const host = req.get('Host');
+//     if (host !== allowedHost) {
+//         return res.status(503).send('Server Unactive');
+//     }
+//     next();
+// }
+
+// app.use((req, res, next) => {
+
+//     if (!req.secure) {
+//         return res.redirect(`https://${req.hostname}${req.url}`);
+//     }
+//     next();
+// });
+
 
 // app.use((req, res, next) => {
 //     if (!req.secure) {
@@ -19,6 +36,8 @@ app.use(bodyParser.json());
 //     }
 //     next();
 // });
+
+//app.use('checkHost')
 
 app.set('view engine', 'ejs');
 
@@ -268,15 +287,15 @@ app.post('/api/create', (req, res) => {
 app.use('/files', express.static('files'))
 app.use(express.static(path.join(__dirname, 'dist'), {
     setHeaders: (res, path) => {
-      if (path.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript');
-      }
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        }
     },
-  }));
+}));
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-  });
+});
 
 // const options = {
 //     key: fs.readFileSync("priv.pem"),
