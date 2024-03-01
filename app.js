@@ -158,7 +158,7 @@ app.get('/api/edit/*', (req, res) => {
             return res.status(status).send('Error processing your request');
         }
 
-        if (stats.size > 16384) {
+        if (stats.size > 65536) {
             return res.status(413).json({ error: 'File size exceeds 2 kilobytes' });
         }
 
