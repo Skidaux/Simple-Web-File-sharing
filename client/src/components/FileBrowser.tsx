@@ -373,7 +373,7 @@ const FileBrowser: React.FC = () => {
                       <FaDownload />
                     </Button>
                   </a>
-                  {file.isText && parseFileSize(file.size) <= 16384 ? (
+                  {file.isText && parseFileSize(file.size) <= 65536 ? (
                     <Button onClick={() => handleEdit(file.path)} className="ml-2 bg-blue-600 hover:bg-blue-700">
                       <FaPenSquare />
                     </Button>
