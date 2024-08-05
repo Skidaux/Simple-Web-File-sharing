@@ -9,10 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
-
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -20,15 +19,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 import CreateFileDialog from './CreateFileDialog';
 
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFileAlt, FaUpload, FaCheckCircle } from 'react-icons/fa';
+import { FaDownload, FaEye, FaPenSquare, FaTrash, FaLock, FaFolder, FaFileAlt, FaUpload, FaCheckCircle, FaGlobe } from 'react-icons/fa';
 import { FcOpenedFolder } from "react-icons/fc";
+import { MdPictureAsPdf, MdImage, MdVideoLibrary, MdMusicNote } from 'react-icons/md';
 
 interface File {
   name: string;
@@ -37,6 +37,7 @@ interface File {
   size: string;
   isText: boolean | null;
 }
+
 interface FileSizeUnits {
   [unit: string]: number;
 }
@@ -58,9 +59,6 @@ const FileBrowser: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const segments = path.split('/');
 
-
-
-
   const formatSize = (size: number): string => {
     if (size < 1024) {
       return `${size} B`;
@@ -70,6 +68,34 @@ const FileBrowser: React.FC = () => {
       return `${(size / 1024 ** 2).toFixed(2)} MB`;
     } else {
       return `${(size / 1024 ** 3).toFixed(2)} GB`;
+    }
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return <MdPictureAsPdf className="mr-2 text-red-500" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'bmp':
+        return <MdImage className="mr-2 text-blue-500" />;
+      case 'mp4':
+      case 'mkv':
+      case 'webm':
+      case 'avi':
+        return <MdVideoLibrary className="mr-2 text-purple-500" />;
+      case 'mp3':
+      case 'wav':
+      case 'flac':
+        return <MdMusicNote className="mr-2 text-green-500" />;
+      case 'html':
+      case 'htm': 
+        return <FaGlobe className="mr-2 text-gray-700" />;
+      default:
+        return <FaFileAlt className="mr-2" />;
     }
   };
 
@@ -95,11 +121,6 @@ const FileBrowser: React.FC = () => {
   }, [path]);
 
   const handleDelete = async (filePath: string) => {
-    // Confirm before deleting
-    // if (!window.confirm(`Are you sure you want to delete "${filePath}"?`)) {
-    //   return;
-    // }
-
     try {
       const response = await fetch(`/api/delete/${filePath}`, {
         method: 'POST',
@@ -107,7 +128,6 @@ const FileBrowser: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Network response was not ok, status: ${response.status}`);
       }
-      // Refresh the list of files after deletion
       await fetchFiles();
     } catch (error) {
       console.error('Failed to delete file:', error);
@@ -126,7 +146,6 @@ const FileBrowser: React.FC = () => {
     return `/browse/${segments.join('/')}`;
   };
 
-  // Fetch files again to refresh the list
   const fetchFiles = async () => {
     setIsLoading(true);
     const apiPath = path ? `/api/list/${path}` : '/api/list/';
@@ -143,14 +162,13 @@ const FileBrowser: React.FC = () => {
       setIsLoading(false);
     }
   };
+
   const parseFileSize = (fileSize: string): number => {
     if (!fileSize) return 0;
     const units: FileSizeUnits = { B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3 };
     const match = fileSize.match(/(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)/);
     return match ? parseFloat(match[1]) * (units[match[2]] || 0) : 0;
   };
-
-
 
   const handleFileUpload = () => {
     if (fileInputRef.current && fileInputRef.current.files) {
@@ -160,7 +178,7 @@ const FileBrowser: React.FC = () => {
       formData.append('file', file);
 
       setFileSize(file.size);
-      setIsUploadComplete(false); // Reset upload completion status
+      setIsUploadComplete(false);
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/upload', true);
@@ -182,16 +200,14 @@ const FileBrowser: React.FC = () => {
       xhr.onload = async () => {
         if (xhr.status === 200) {
           await fetchFiles();
-          setIsUploadComplete(true); // Set upload completion status to true
+          setIsUploadComplete(true);
         } else {
           console.error('Failed to upload file:', xhr.responseText);
         }
-        // Do not reset the progress state variables here
       };
 
       xhr.onerror = () => {
         console.error('Upload error');
-        // Reset the progress state variables on error
         setUploadProgress(null);
         setUploadSpeed(null);
         setUploadedData(null);
@@ -201,23 +217,27 @@ const FileBrowser: React.FC = () => {
       xhr.send(formData);
     }
   };
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (dropZoneRef.current) {
       dropZoneRef.current.classList.add('bg-gray-50', 'border-gray-400');
     }
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFileName(e.target.files[0].name);
     }
   };
+
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (dropZoneRef.current) {
       dropZoneRef.current.classList.remove('bg-gray-50', 'border-gray-400');
     }
   };
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (dropZoneRef.current) {
@@ -228,6 +248,7 @@ const FileBrowser: React.FC = () => {
       e.dataTransfer.clearData();
     }
   };
+
   const handleCreateFileOrFolder = async (name: string, type: 'file' | 'directory') => {
     const response = await fetch('/api/create', {
       method: 'POST',
@@ -247,21 +268,27 @@ const FileBrowser: React.FC = () => {
       return;
     }
 
-    await fetchFiles(); // Refresh the list of files
+    await fetchFiles();
   };
 
   return (
-
     <div className="p-4 flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold flex"><FcOpenedFolder className='mx-3 w-7 h-7' />Browsing: <code className='mb-3 text-2xl'><Link className="text-teal-500 " to={`/browse/`}>/</Link></code>{segments.map((segment, index) => (
-          <React.Fragment key={segment}>
-            {index > 0 && '/'}
-            <Link className="text-blue-600 hover:underline mx-1" to={`/browse/${segments.slice(0, index + 1).join('/')}`}>
-              {segment || ''}
-            </Link>
-          </React.Fragment>
-        ))}</h2>
+        <h2 className="text-lg font-bold flex">
+          <FcOpenedFolder className='mx-3 w-7 h-7' />
+          Browsing:
+          <code className='mb-3 text-2xl'>
+            <Link className="text-teal-500 " to={`/browse/`}>/</Link>
+          </code>
+          {segments.map((segment, index) => (
+            <React.Fragment key={segment}>
+              {index > 0 && '/'}
+              <Link className="text-blue-600 hover:underline mx-1" to={`/browse/${segments.slice(0, index + 1).join('/')}`}>
+                {segment || ''}
+              </Link>
+            </React.Fragment>
+          ))}
+        </h2>
         <div className='flex'>
           <CreateFileDialog onCreate={handleCreateFileOrFolder} />
           <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -294,9 +321,7 @@ const FileBrowser: React.FC = () => {
                   </div>
                   {uploadProgress !== null && (
                     <div className="mt-4 flex space-x-8 justify-center">
-
                       <CircularProgressbar value={uploadProgress} text={`${Math.round(uploadProgress)}%`} className='w-20 h-20' />
-
                       <div className="text-sm mt-1">
                         <div>Speed: {uploadSpeed ? `${formatSize(uploadSpeed)}/s` : 'N/A'}</div>
                         <div>Uploaded: {uploadedData ? formatSize(uploadedData) : 'N/A'}</div>
@@ -319,7 +344,6 @@ const FileBrowser: React.FC = () => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
         </div>
       </div>
       <div className="space-y-2">
@@ -332,21 +356,23 @@ const FileBrowser: React.FC = () => {
                 </Link>
               ) : (
                 <span className="flex items-center">
-                  <FaFileAlt className="mr-2" /> {file.name} | {file.size}
+                  {getFileIcon(file.name)} {file.name} | {file.size}
                 </span>
               )}
             </div>
             <div className="flex items-center">
               {file.type === 'directory' ? (
                 <Dialog>
-                  <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
-                    <FaTrash />
-                  </Button></DialogTrigger>
+                  <DialogTrigger>
+                    <Button className="ml-2 bg-red-600 hover:bg-red-700">
+                      <FaTrash />
+                    </Button>
+                  </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Delete '/{file.name}'</DialogTitle>
                       <DialogDescription className=''>
-                        <p>Are you sure you want delete this folder stored: '/{path}{file.name}'. All it's subdirectories and files will be deleted</p>
+                        <p>Are you sure you want delete this folder stored: '/{path}{file.name}'. All its subdirectories and files will be deleted</p>
                         <div className='space-x-10 mx-4 flex justify-center'>
                           <Button onClick={() => handleDelete(file.path)} className="ml-2 bg-red-600 hover:bg-red-700">
                             <FaTrash />  Delete
@@ -384,9 +410,11 @@ const FileBrowser: React.FC = () => {
                   )}
 
                   <Dialog>
-                    <DialogTrigger> <Button className="ml-2 bg-red-600 hover:bg-red-700">
-                      <FaTrash />
-                    </Button></DialogTrigger>
+                    <DialogTrigger>
+                      <Button className="ml-2 bg-red-600 hover:bg-red-700">
+                        <FaTrash />
+                      </Button>
+                    </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Delete '{file.name}'</DialogTitle>
@@ -406,14 +434,11 @@ const FileBrowser: React.FC = () => {
                       </DialogHeader>
                     </DialogContent>
                   </Dialog>
-
-
                 </>
               )}
             </div>
           </div>
         ))}
-
       </div>
       {path && <Link to={goBackPath()} className="block mt-4 text-blue-500 hover:underline">Go Back</Link>}
     </div>
