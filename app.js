@@ -66,26 +66,61 @@ const isTextFile = (buffer) => {
         return true; // Treat as text file
     }
 
-    // Count the occurrences of text characters, emojis, and other special symbols
-    let textCount = 0;
-    let specialCount = 0;
+    // Function to check if a character is likely to be text
+    const isLikelyText = (code) => {
+        return (
+            (code >= 9 && code <= 13) || // Tab, newline, etc.
+            (code >= 32 && code <= 126) || // ASCII printable characters
+            (code >= 128 && code <= 887) || // Latin, Extended Latin, IPA, Greek, Cyrillic, etc.
+            (code >= 900 && code <= 1279) || // More scripts (Coptic, Armenian, Hebrew, Arabic, Syriac, Thaana)
+            (code >= 1280 && code <= 1327) || // Ethiopic
+            (code >= 1328 && code <= 1423) || // Cherokee, Canadian Aboriginal Syllabics
+            (code >= 1424 && code <= 1535) || // More Hebrew and Arabic
+            (code >= 1536 && code <= 1791) || // More Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic
+            (code >= 1792 && code <= 1871) || // Mongolian, Limbu, Tai Le
+            (code >= 1920 && code <= 2047) || // Tai Lue, Buginese, Tai Tham, Balinese
+            (code >= 2048 && code <= 2303) || // Sundanese, Batak, Lepcha, Ol Chiki
+            (code >= 2304 && code <= 2431) || // Devanagari
+            (code >= 2432 && code <= 2559) || // Bengali
+            (code >= 2560 && code <= 2687) || // Gurmukhi, Gujarati
+            (code >= 2688 && code <= 2815) || // Oriya, Tamil
+            (code >= 2816 && code <= 2943) || // Telugu, Kannada
+            (code >= 2944 && code <= 3071) || // Malayalam, Sinhala
+            (code >= 3072 && code <= 3199) || // Thai
+            (code >= 3200 && code <= 3327) || // Lao
+            (code >= 3328 && code <= 3455) || // Tibetan
+            (code >= 3456 && code <= 3583) || // Myanmar
+            (code >= 3584 && code <= 3711) || // Georgian
+            (code >= 3712 && code <= 3839) || // Hangul Jamo
+            (code >= 4352 && code <= 4607) || // Hangul Jamo Extended-A
+            (code >= 12288 && code <= 12351) || // CJK Symbols and Punctuation
+            (code >= 12352 && code <= 12447) || // Hiragana
+            (code >= 12448 && code <= 12543) || // Katakana
+            (code >= 13312 && code <= 19903) || // CJK Unified Ideographs Extension A
+            (code >= 19968 && code <= 40959) || // CJK Unified Ideographs
+            (code >= 43360 && code <= 43391) || // Hangul Jamo Extended-B
+            (code >= 44032 && code <= 55215) // Hangul Syllables
+        );
+    };
 
-    for (const char of utf8String) {
-        const code = char.charCodeAt(0);
-        if ((code >= 32 && code <= 126) || code === 9 || code === 10 || code === 13) {
+    let textCount = 0;
+    let nonTextCount = 0;
+    const totalSample = Math.min(utf8String.length, 10000); // Sample up to 10,000 characters
+
+    for (let i = 0; i < totalSample; i++) {
+        const code = utf8String.charCodeAt(i);
+        if (isLikelyText(code)) {
             textCount++;
         } else {
-            specialCount++;
+            nonTextCount++;
         }
     }
 
-    // Calculate the ratio of text characters to emojis and other special symbols
-    const totalCharacters = textCount + specialCount;
-    const textRatio = textCount / totalCharacters;
-    const specialRatio = specialCount / totalCharacters;
+    // Calculate the ratio of text characters to non-text characters
+    const textRatio = textCount / (textCount + nonTextCount);
 
-    // Check if the text ratio is greater than or equal to 3:1
-    return textRatio >= 0.75 && specialRatio <= 0.25;
+    // Consider it a text file if at least 90% of characters are likely text
+    return textRatio >= 0.9;
 };
 
 
