@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import AceEditor from "react-ace";
 import { Button } from "@/components/ui/button";
@@ -13,20 +13,19 @@ import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-monokai";
 
 const EditFile: React.FC = () => {
-  const params = useParams(); // Use useParams without specifying a custom type
+  const params = useParams();
   const navigate = useNavigate();
   const match = useMatch("/edit/*");
   const filePath = match?.params['*'] || '';
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [fileExtension, setFileExtension] = useState<string>(''); // Add state for file extension
+  const [fileExtension, setFileExtension] = useState<string>('');
   const [savedContent, setSavedContent] = useState<string>('');
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    // Assert that filePath exists and is a string
     if (!filePath) {
       console.log('File path is undefined');
       setIsLoading(false);
@@ -45,7 +44,6 @@ const EditFile: React.FC = () => {
         setContent(data.content);
         setSavedContent(data.content);
 
-        // Extract file extension from filename
         const filename = data.filename || '';
         const extension = filename.split('.').pop()?.toLowerCase() || '';
         setFileExtension(extension);
@@ -57,19 +55,18 @@ const EditFile: React.FC = () => {
     };
 
     fetchFileContent();
-  }, [params.filePath]); // Depend on params.filePath directly
+  }, [filePath]);
 
   const handleAceChange = (newContent: string) => {
     setContent(newContent);
     setUnsavedChanges(true);
   };
 
-  const saveFile = async () => {
+  const saveFile = useCallback(async () => {
     if (!filePath) {
       console.error('File path is undefined');
       return;
     }
-    console.log(filePath);
     try {
       const encodedFilePath = encodeURIComponent(filePath);
       const response = await fetch(`/api/save/${encodedFilePath}`, {
@@ -98,25 +95,21 @@ const EditFile: React.FC = () => {
         description: "Error saving File",
       });
     }
-  };
+  }, [filePath, content, toast]);
 
-  const handleSave = (event: KeyboardEvent) => {
-    // Check if the Ctrl key (or Command key on Mac) and 'S' key are pressed
+  const handleSave = useCallback((event: KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-      event.preventDefault(); // Prevent the default save behavior
-      saveFile(); // Call your save function
+      event.preventDefault();
+      saveFile();
     }
-  };
+  }, [saveFile]);
 
   useEffect(() => {
-    // Add event listener when component mounts
     window.addEventListener('keydown', handleSave);
-
-    // Clean up event listener when component unmounts
     return () => {
       window.removeEventListener('keydown', handleSave);
     };
-  }, []);
+  }, [handleSave]);
 
   const discardChanges = () => {
     if (unsavedChanges) {
@@ -125,7 +118,7 @@ const EditFile: React.FC = () => {
         return;
       }
     }
-    setContent(savedContent); // Reset content to the saved state
+    setContent(savedContent);
     setUnsavedChanges(false);
   };
 
@@ -157,7 +150,7 @@ const EditFile: React.FC = () => {
 
   if (isLoading) return <div>Loading...</div>;
 
-  let mode = ''; // Initialize mode variable
+  let mode = '';
   switch (fileExtension) {
     case 'js':
       mode = 'javascript';
@@ -169,7 +162,7 @@ const EditFile: React.FC = () => {
       mode = 'json';
       break;
     default:
-      mode = 'text'; // Default to plain text
+      mode = 'text';
       break;
   }
 
@@ -188,15 +181,15 @@ const EditFile: React.FC = () => {
         width="100%"
         height="100%"
         value={content}
-        mode={mode} // Use the dynamically determined mode
+        mode={mode}
         theme="monokai"
         fontSize="16px"
         highlightActiveLine={true}
         onChange={handleAceChange}
         setOptions={{
-          enableLiveAutocompletion: true, // Enable live auto-completion
-          enableBasicAutocompletion: true, // Enable basic auto-completion
-          enableSnippets: true, // Enable snippets
+          enableLiveAutocompletion: true,
+          enableBasicAutocompletion: true,
+          enableSnippets: true,
           showLineNumbers: true,
           tabSize: 2,
         }}
