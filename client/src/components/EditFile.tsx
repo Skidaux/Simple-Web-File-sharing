@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useMatch } from 'react-router-dom';
+import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import AceEditor from "react-ace";
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-
-
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 // Import language tools for auto-completion and snippets
 import "ace-builds/src-noconflict/ext-language_tools";
@@ -88,13 +85,11 @@ const EditFile: React.FC = () => {
       console.log('File saved successfully');
       setSavedContent(content);
       setUnsavedChanges(false);
-      // This should be outside the saveFile function
       toast({
         variant: "success",
         title: "File saved",
         description: "The file has been successfully saved.",
       });
-      // Navigate or show success message as needed
     } catch (error) {
       console.error('Failed to save file:', error);
       toast({
@@ -105,10 +100,28 @@ const EditFile: React.FC = () => {
     }
   };
 
+  const handleSave = (event: KeyboardEvent) => {
+    // Check if the Ctrl key (or Command key on Mac) and 'S' key are pressed
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault(); // Prevent the default save behavior
+      saveFile(); // Call your save function
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener when component mounts
+    window.addEventListener('keydown', handleSave);
+
+    // Clean up event listener when component unmounts
+    return () => {
+      window.removeEventListener('keydown', handleSave);
+    };
+  }, []);
+
   const discardChanges = () => {
     if (unsavedChanges) {
-      const discardconfirm = window.confirm('Are you sure to discard changes');
-      if (!discardconfirm) {
+      const discardConfirm = window.confirm('Are you sure you want to discard changes?');
+      if (!discardConfirm) {
         return;
       }
     }
@@ -127,7 +140,6 @@ const EditFile: React.FC = () => {
     navigate(`/browse/${directoryPath}`);
   };
 
-
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (unsavedChanges) {
@@ -142,8 +154,6 @@ const EditFile: React.FC = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [unsavedChanges]);
-
-
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -171,7 +181,6 @@ const EditFile: React.FC = () => {
           <Button className="bg-green-600 hover:bg-green-700 mr-2" onClick={saveFile}>Save</Button>
           <Button className="bg-red-600 hover:bg-red-700 mr-2" onClick={discardChanges}>Discard</Button>
           <Button className="bg-blue-600 hover:bg-blue-700 mr-2" onClick={Browse}>Go Back</Button>
-
         </div>
       </div>
       <AceEditor
@@ -193,7 +202,6 @@ const EditFile: React.FC = () => {
         }}
       />
     </div>
-
   );
 };
 
