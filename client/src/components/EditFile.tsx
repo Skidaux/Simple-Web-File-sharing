@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, useMatch } from 'react-router-dom';
+import { useNavigate, useMatch } from 'react-router-dom';
 import AceEditor from "react-ace";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,7 +13,7 @@ import "ace-builds/src-noconflict/mode-text";
 import "ace-builds/src-noconflict/theme-monokai";
 
 const EditFile: React.FC = () => {
-  const params = useParams();
+  // const params = useParams();
   const navigate = useNavigate();
   const match = useMatch("/edit/*");
   const filePath = match?.params['*'] || '';

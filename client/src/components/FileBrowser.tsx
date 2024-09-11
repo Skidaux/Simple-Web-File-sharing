@@ -346,9 +346,9 @@ const FileBrowser: React.FC = () => {
           </AlertDialog>
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="border border-gray-300 rounded-lg">
         {files.map((file) => (
-          <div key={file.path} className="flex items-center border border-gray-300 rounded-lg p-4">
+          <div key={file.path} className="flex items-center border-b border-t mx-2 border-gray-300  p-4">
             <div className="flex items-center flex-grow">
               {file.type === 'directory' ? (
                 <Link to={`/browse/${file.path}`} className="text-blue-500 hover:underline flex items-center">
